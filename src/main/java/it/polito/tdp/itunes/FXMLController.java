@@ -6,7 +6,10 @@ package it.polito.tdp.itunes;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.itunes.model.Genre;
 import it.polito.tdp.itunes.model.Model;
+import it.polito.tdp.itunes.model.Track;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,6 +20,7 @@ import javafx.scene.control.TextField;
 public class FXMLController {
 
 	private Model model;
+	private boolean entrato = false;
 	
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -34,10 +38,10 @@ public class FXMLController {
     private Button btnMassimo; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbCanzone"
-    private ComboBox<?> cmbCanzone; // Value injected by FXMLLoader
+    private ComboBox<Track> cmbCanzone; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbGenere"
-    private ComboBox<?> cmbGenere; // Value injected by FXMLLoader
+    private ComboBox<Genre> cmbGenere; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtMemoria"
     private TextField txtMemoria; // Value injected by FXMLLoader
@@ -47,17 +51,35 @@ public class FXMLController {
 
     @FXML
     void btnCreaLista(ActionEvent event) {
-
+    	txtResult.clear();
+    	if(entrato) {
+    		if(cmbCanzone.getValue() != null && txtMemoria.getText() != "") {
+    			try {
+					int mem = Integer.parseInt(txtMemoria.getText());
+					txtResult.appendText(model.trovaSequenza(cmbCanzone.getValue(), mem));
+				} catch (NumberFormatException e) {
+					throw e;
+				}
+    		}
+    	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	txtResult.clear();
+    	if(cmbGenere.getValue() != null) {
+    		entrato = true;
+    		model.creaGrafo(cmbGenere.getValue());
+    		txtResult.appendText("GRAFO CREATO!\n# VERTICI: " + model.nVertici() + "\n# ARCHI: " + model.nArchi());
+    		cmbCanzone.getItems().addAll(model.getVertici());
+    	}
     }
 
     @FXML
     void doDeltaMassimo(ActionEvent event) {
-    	
+    	txtResult.clear();
+    	txtResult.appendText("COPPIA CANZONI DEL MOMENTO: \n");
+    	txtResult.appendText(model.stampaMassimo());
     	
     }
 
@@ -75,6 +97,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	cmbGenere.getItems().addAll(model.getGeneri());
     }
 
 }
